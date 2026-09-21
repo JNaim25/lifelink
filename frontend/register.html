@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | LifeLink Blood Bank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div id="navbar-mount"></div>
+
+    <main class="container py-5 flex-grow-1 d-flex align-items-center justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg p-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-danger-subtle text-danger mb-2">
+                        <i class="bi bi-person-plus-fill fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">Create an Account</h3>
+                    <p class="text-muted small">Join LifeLink as a voluntary donor or hospital requester</p>
+                </div>
+
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Dr. S. Rahman" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" id="email" class="form-control" placeholder="s.rahman@example.com" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Contact Phone <span class="text-danger">*</span></label>
+                            <input type="tel" id="phone" class="form-control" placeholder="+880 1711-123456" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Select Role <span class="text-danger">*</span></label>
+                            <select id="role" class="form-select" onchange="toggleDonorFields(this.value)" required>
+                                <option value="DONOR">Voluntary Blood Donor</option>
+                                <option value="REQUESTER">Hospital / Medical Requester</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                            <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                            <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" required>
+                        </div>
+
+                        <!-- Dynamic Donor Fields Container -->
+                        <div id="donorFields" class="col-12 border-top pt-3 mt-3">
+                            <h6 class="fw-bold text-danger mb-3"><i class="bi bi-heart-pulse me-1"></i>Donor Medical Profile</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Blood Group</label>
+                                    <select id="bloodGroupId" class="form-select">
+                                        <option value="1">A+</option>
+                                        <option value="2">A-</option>
+                                        <option value="3">B+</option>
+                                        <option value="4">B-</option>
+                                        <option value="5">AB+</option>
+                                        <option value="6">AB-</option>
+                                        <option value="7">O+</option>
+                                        <option value="8">O-</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Gender</label>
+                                    <select id="gender" class="form-select">
+                                        <option value="MALE">Male</option>
+                                        <option value="FEMALE">Female</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Date of Birth</label>
+                                    <input type="date" id="dateOfBirth" class="form-control" value="1998-05-15">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">City</label>
+                                    <input type="text" id="city" class="form-control" value="Dhaka">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Address</label>
+                                    <input type="text" id="address" class="form-control" placeholder="Dhanmondi, Dhaka">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" id="registerBtn" class="btn btn-danger btn-lg w-100 fw-bold shadow-sm">
+                                Create Account
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top small text-muted">
+                    Already registered? <a href="login.html" class="text-danger fw-bold">Sign In here</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-mount"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/navbar.js"></script>
+
+    <script>
+        function toggleDonorFields(role) {
+            const el = document.getElementById('donorFields');
+            if (role === 'DONOR') {
+                el.classList.remove('d-none');
+            } else {
+                el.classList.add('d-none');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const pw = document.getElementById('password').value;
+            const confirmPw = document.getElementById('confirmPassword').value;
+
+            if (pw !== confirmPw) {
+                showToast('Passwords do not match.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Creating account...`;
+
+            const role = document.getElementById('role').value;
+            const payload = {
+                full_name: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                role: role,
+                password: pw,
+                blood_group_id: document.getElementById('bloodGroupId').value,
+                gender: document.getElementById('gender').value,
+                date_of_birth: document.getElementById('dateOfBirth').value,
+                city: document.getElementById('city').value.trim(),
+                address: document.getElementById('address').value.trim()
+            };
+
+            try {
+                const res = await apiRequest('auth.php?action=register', 'POST', payload);
+                showToast('Registration successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    if (role === 'DONOR') {
+                        window.location.href = 'donor_dashboard.html';
+                    } else if (role === 'REQUESTER') {
+                        window.location.href = 'requester_dashboard.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 800);
+            } catch (err) {
+                showToast(err.message, 'danger');
+                btn.disabled = false;
+                btn.innerHTML = `Create Account`;
+            }
+        }
+    </script>
+</body>
+</html>

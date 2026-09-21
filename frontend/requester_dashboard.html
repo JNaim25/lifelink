@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Requisitions Portal | LifeLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div id="navbar-mount"></div>
+
+    <main class="container py-4 flex-grow-1">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-hospital text-danger me-2"></i>Hospital Requisitions Portal</h2>
+                <p class="text-muted mb-0">Track clinical blood requests, fulfillment status, and unit allocations</p>
+            </div>
+            <a href="new_request.html" class="btn btn-danger fw-bold shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i>New Blood Request
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm bg-white">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">My Requisition Orders</h5>
+                <button class="btn btn-outline-secondary btn-sm" onclick="loadRequests()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body p-0" id="requestsMount">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-danger" role="status"></div>
+                    <div class="text-muted mt-2">Loading requisitions...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-mount"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="js/journey_modal.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadRequests);
+
+        async function loadRequests() {
+            const mount = document.getElementById('requestsMount');
+            try {
+                const res = await apiRequest('requests.php');
+                const items = res.data || [];
+
+                if (items.length === 0) {
+                    mount.innerHTML = `
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-clipboard-x fs-1 text-secondary"></i>
+                            <h6 class="mt-2 fw-bold">No Requisitions Placed Yet</h6>
+                            <p class="small text-muted mb-3">You have not submitted any patient blood requisitions.</p>
+                            <a href="new_request.html" class="btn btn-danger btn-sm">Create First Request</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                mount.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th># Ticket</th>
+                                    <th>Patient Name</th>
+                                    <th>Group</th>
+                                    <th>Units</th>
+                                    <th>Urgency</th>
+                                    <th>Required Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map(req => {
+                                    let statusBadge = '';
+                                    if (req.status === 'FULFILLED') statusBadge = '<span class="badge bg-success">FULFILLED</span>';
+                                    else if (req.status === 'APPROVED') statusBadge = '<span class="badge bg-primary">APPROVED</span>';
+                                    else if (req.status === 'PENDING') statusBadge = '<span class="badge bg-warning text-dark">PENDING</span>';
+                                    else if (req.status === 'REJECTED') statusBadge = '<span class="badge bg-danger">REJECTED</span>';
+                                    else statusBadge = `<span class="badge bg-secondary">${req.status}</span>`;
+
+                                    let urgencyBadge = req.urgency === 'EMERGENCY' ? '<span class="badge bg-danger pulsing-badge">EMERGENCY</span>' :
+                                                       req.urgency === 'URGENT' ? '<span class="badge bg-warning text-dark">URGENT</span>' :
+                                                       '<span class="badge bg-secondary">ROUTINE</span>';
+
+                                    return `
+                                        <tr>
+                                            <td class="font-monospace fw-bold">#REQ-${req.request_id}</td>
+                                            <td>
+                                                <div class="fw-bold">${req.patient_name}</div>
+                                                <div class="text-muted" style="font-size: 0.75rem;">${req.hospital_name}</div>
+                                            </td>
+                                            <td><span class="badge bg-dark fs-6">${req.blood_group}</span></td>
+                                            <td class="fw-bold">${req.units_requested}</td>
+                                            <td>${urgencyBadge}</td>
+                                            <td>${req.required_date}</td>
+                                            <td>${statusBadge}</td>
+                                            <td>
+                                                ${req.status === 'PENDING' ? `
+                                                    <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="cancelRequest(${req.request_id})">
+                                                        <i class="bi bi-trash me-1"></i>Cancel
+                                                    </button>
+                                                ` : `
+                                                    <span class="text-muted small">-</span>
+                                                `}
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                mount.innerHTML = `<div class="p-3 alert alert-danger">${err.message}</div>`;
+            }
+        }
+
+        async function cancelRequest(requestId) {
+            if (!confirm(`Are you sure you want to cancel Requisition Ticket #REQ-${requestId}?\nThis will remove the ticket from the active queue.`)) {
+                return;
+            }
+
+            try {
+                const res = await apiRequest('requests.php?action=cancel', 'POST', { request_id: requestId });
+                showToast(res.message, 'info');
+                loadRequests();
+            } catch (err) {
+                showToast(err.message, 'danger');
+            }
+        }
+    </script>
+</body>
+</html>

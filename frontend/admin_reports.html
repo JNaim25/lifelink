@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBMS Syllabus Demonstration | LifeLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div id="navbar-mount"></div>
+
+    <main class="container-fluid px-lg-4 py-4 flex-grow-1">
+        <div class="mb-4">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-database-check text-primary fs-3"></i>
+                <h2 class="fw-bold mb-0">DBMS Laboratory Syllabus Demonstrator</h2>
+                <span class="badge bg-primary fs-6">CSE 3522 Lab Inspection</span>
+            </div>
+            <p class="text-muted mb-0">
+                Interactive verification suite for relational database queries: Aggregations, Multi-Table JOINs, Correlated Subqueries, Reusable Views, and B-Tree Indexes with live execution benchmarking.
+            </p>
+        </div>
+
+        <!-- Query Selector Tabs -->
+        <div class="card border-0 shadow-sm p-3 mb-4 bg-white">
+            <div class="d-flex gap-2 flex-wrap" id="queryButtons">
+                <button class="btn btn-outline-primary btn-sm active" onclick="loadDemonstrationQuery('aggregation', this)">
+                    <i class="bi bi-calculator me-1"></i>1. Aggregations (GROUP BY & HAVING)
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadDemonstrationQuery('inner_join', this)">
+                    <i class="bi bi-link-45deg me-1"></i>2. Multi-Table INNER JOIN
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadDemonstrationQuery('left_join', this)">
+                    <i class="bi bi-arrows-expand me-1"></i>3. SQL LEFT JOIN
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadDemonstrationQuery('correlated_subquery', this)">
+                    <i class="bi bi-arrow-return-right me-1"></i>4. Correlated Subquery
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadDemonstrationQuery('nested_subquery', this)">
+                    <i class="bi bi-layers me-1"></i>5. Nested Subquery
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadDemonstrationQuery('view_radar', this)">
+                    <i class="bi bi-eye me-1"></i>6. View (view_blood_availability)
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadDemonstrationQuery('view_emergency', this)">
+                    <i class="bi bi-clock-history me-1"></i>7. View (view_emergency_queue)
+                </button>
+            </div>
+        </div>
+
+        <!-- Query Output Card -->
+        <div class="card border-0 shadow-sm bg-white">
+            <div class="card-header bg-white py-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="fw-bold mb-0" id="queryTitle">Aggregations with GROUP BY and HAVING</h5>
+                        <div class="small text-muted" id="queryConcept">Calculating COUNT, SUM, AVG, MIN, MAX across blood groups</div>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="badge bg-success" id="benchmarkTime">Execution: 0.0 ms</span>
+                        <span class="badge bg-dark" id="rowCount">0 rows</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formatted SQL Code Box -->
+            <div class="p-3 bg-dark text-light border-bottom font-monospace small" style="overflow-x: auto;">
+                <pre class="mb-0 text-info" id="querySql">-- SQL query will load here</pre>
+            </div>
+
+            <!-- Query Result Dataset Mount -->
+            <div class="card-body p-0" id="queryResultMount">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="text-muted mt-2">Executing query on MySQL...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-mount"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/navbar.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDemonstrationQuery('aggregation');
+        });
+
+        async function loadDemonstrationQuery(type, btnElement = null) {
+            if (btnElement) {
+                document.querySelectorAll('#queryButtons button').forEach(b => b.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
+
+            const mount = document.getElementById('queryResultMount');
+            mount.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="text-muted mt-2">Executing benchmarked query on MySQL...</div>
+                </div>
+            `;
+
+            try {
+                const res = await apiRequest(`reports.php?query=${type}`);
+                const d = res.data;
+
+                document.getElementById('queryTitle').innerText = d.title;
+                document.getElementById('queryConcept').innerText = d.concept;
+                document.getElementById('benchmarkTime').innerText = `Execution: ${d.execution_time_ms} ms`;
+                document.getElementById('rowCount').innerText = `${d.row_count} rows returned`;
+                document.getElementById('querySql').innerText = d.sql;
+
+                if (!d.results || d.results.length === 0) {
+                    mount.innerHTML = `<div class="p-4 text-center text-muted">Query executed successfully. 0 rows matched.</div>`;
+                    return;
+                }
+
+                // Render dynamic HTML table based on returned JSON keys
+                const headers = Object.keys(d.results[0]);
+                mount.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    ${headers.map(h => `<th>${h.replace(/_/g, ' ').toUpperCase()}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${d.results.map(row => `
+                                    <tr>
+                                        ${headers.map(h => `<td>${row[h] !== null ? row[h] : '<span class="text-muted">NULL</span>'}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                mount.innerHTML = `<div class="p-3 alert alert-danger">${err.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Command Center | LifeLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div id="navbar-mount"></div>
+
+    <main class="container-fluid px-lg-4 py-4 flex-grow-1">
+        <!-- Top Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-speedometer2 text-danger me-2"></i>Admin Command Center</h2>
+                <p class="text-muted mb-0">Central monitoring, emergency triage, cold-chain shelf life, and ACID transaction hub</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="admin_reports.html" class="btn btn-outline-primary fw-semibold">
+                    <i class="bi bi-database-check me-1"></i>DBMS Queries Demo
+                </a>
+                <a href="admin_donations.html" class="btn btn-danger fw-semibold">
+                    <i class="bi bi-droplet-fill me-1"></i>Record Donation Session
+                </a>
+            </div>
+        </div>
+
+        <!-- KPI Cards Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Available Blood Bags</div>
+                            <h2 class="fw-bold my-1 text-success" id="kpiAvailable">--</h2>
+                            <div class="small text-muted">Viable & Non-expired</div>
+                        </div>
+                        <div class="p-3 bg-success-subtle text-success rounded-3"><i class="bi bi-box-seam fs-3"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Emergency Triage</div>
+                            <h2 class="fw-bold my-1 text-danger" id="kpiEmergency">--</h2>
+                            <div class="small text-muted">Pending Immediate Action</div>
+                        </div>
+                        <div class="p-3 bg-danger-subtle text-danger rounded-3"><i class="bi bi-lightning-charge fs-3"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Cold-Chain Expiry</div>
+                            <h2 class="fw-bold my-1 text-warning" id="kpiExpiring">--</h2>
+                            <div class="small text-muted">Expiring in ≤ 7 days</div>
+                        </div>
+                        <div class="p-3 bg-warning-subtle text-warning rounded-3"><i class="bi bi-snow2 fs-3"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Issued Transfusions</div>
+                            <h2 class="fw-bold my-1 text-primary" id="kpiIssued">--</h2>
+                            <div class="small text-muted">ACID-Committed Units</div>
+                        </div>
+                        <div class="p-3 bg-primary-subtle text-primary rounded-3"><i class="bi bi-check-all fs-3"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-3 bg-white h-100">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill text-danger me-2"></i>Live Stock Inventory by Blood Group</h6>
+                    <div style="height: 250px;">
+                        <canvas id="stockChartCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-3 bg-white h-100">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-shuffle text-primary me-2"></i>Feature 9: Blood Demand vs. Available Supply</h6>
+                    <div style="height: 250px;">
+                        <canvas id="demandSupplyCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Row: Emergency Triage & Cold-Chain Alert -->
+        <div class="row g-4 mb-4">
+            <!-- Emergency Triage Queue Panel -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm bg-white h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger pulsing-badge">LIVE</span>
+                            <h6 class="fw-bold mb-0">Feature 2: Emergency Triage Requisitions</h6>
+                        </div>
+                        <a href="admin_requests.html" class="btn btn-outline-danger btn-sm">Full Queue</a>
+                    </div>
+                    <div class="card-body p-0" id="triageMount">
+                        <div class="text-center py-4 text-muted small">Loading emergency triage queue...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cold-Chain Expiry Warning Alert Panel -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm bg-white h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-thermometer-snow text-warning fs-5"></i>
+                            <h6 class="fw-bold mb-0">Feature 4: Cold-Chain Shelf Life Warning</h6>
+                        </div>
+                        <span class="badge bg-warning text-dark">&le; 7 Days Remaining</span>
+                    </div>
+                    <div class="card-body p-0" id="expiryMount">
+                        <div class="text-center py-4 text-muted small">Loading cold-chain status...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demand vs Supply Matrix Table (Feature 9) -->
+        <div class="card border-0 shadow-sm bg-white mb-4">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0">Feature 9: Relational Demand vs. Available Supply Matrix</h6>
+                        <div class="small text-muted">Correlated subquery balance analysis computed across 8 blood groups</div>
+                    </div>
+                    <span class="badge bg-light text-dark border">Autonomous Balance Assessment</span>
+                </div>
+            </div>
+            <div class="card-body p-0" id="matrixMount">
+                <div class="text-center py-4 text-muted small">Loading demand vs supply matrix...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Issuing Blood (ACID Transaction) -->
+    <div class="modal fade" id="issueModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-shield-check text-success me-2"></i>ACID Blood Issuance</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-3">
+                        This operation executes a mandatory DBMS ACID transaction: locks the requisition, locks earliest expiring FIFO inventory bags with <code>SELECT ... FOR UPDATE</code>, generates issuance records, and updates inventory status atomically.
+                    </p>
+                    <div class="p-3 bg-light rounded border mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Requisition ID:</span>
+                            <span class="fw-bold font-monospace" id="modalReqId">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Patient / Hospital:</span>
+                            <span class="fw-bold" id="modalPatient">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Blood Group:</span>
+                            <span class="badge bg-danger" id="modalBloodGroup">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Units Required:</span>
+                            <span class="fw-bold" id="modalUnits">--</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Authorized Officer Remarks</label>
+                        <input type="text" id="modalRemarks" class="form-control" value="Transfusion units verified and dispatched.">
+                    </div>
+
+                    <div id="modalAlertMount"></div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success fw-bold" id="confirmIssueBtn" onclick="submitIssuanceTransaction()">
+                        <i class="bi bi-check-circle me-1"></i>Commit Transaction
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-mount"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="js/journey_modal.js"></script>
+    <script src="js/dashboard_charts.js"></script>
+
+    <script>
+        let currentIssueRequestId = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await Promise.all([
+                loadKPIs(),
+                loadTriage(),
+                loadExpiring(),
+                loadMatrix(),
+                initDashboardCharts()
+            ]);
+        });
+
+        async function loadKPIs() {
+            try {
+                const [invRes, emRes] = await Promise.all([
+                    apiRequest('inventory.php?action=kpis'),
+                    apiRequest('emergency.php')
+                ]);
+
+                if (invRes.success) {
+                    document.getElementById('kpiAvailable').innerText = invRes.data.total_available || 0;
+                    document.getElementById('kpiExpiring').innerText = invRes.data.total_expiring_soon || 0;
+                    document.getElementById('kpiIssued').innerText = invRes.data.total_issued || 0;
+                }
+                if (emRes.success) {
+                    document.getElementById('kpiEmergency').innerText = emRes.data.length || 0;
+                }
+            } catch (e) {
+                console.error('KPI error:', e);
+            }
+        }
+
+        async function loadTriage() {
+            const mount = document.getElementById('triageMount');
+            try {
+                const res = await apiRequest('emergency.php');
+                const list = res.data || [];
+
+                if (list.length === 0) {
+                    mount.innerHTML = `<div class="text-center py-4 text-muted small"><i class="bi bi-check2-all text-success me-1"></i>No pending emergency requisitions.</div>`;
+                    return;
+                }
+
+                mount.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Patient / Hospital</th>
+                                    <th>Group</th>
+                                    <th>Units</th>
+                                    <th>Urgency</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${list.map(item => `
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">${item.patient_name}</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">${item.hospital_name}</div>
+                                        </td>
+                                        <td><span class="badge bg-dark">${item.blood_group}</span></td>
+                                        <td class="fw-bold">${item.units_requested}</td>
+                                        <td><span class="badge bg-danger pulsing-badge">${item.urgency}</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success py-0 px-2 fw-semibold" onclick="openIssueModal(${item.request_id}, '${item.patient_name}', '${item.hospital_name}', '${item.blood_group}', ${item.units_requested})">
+                                                <i class="bi bi-box-arrow-right me-1"></i>Issue
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (e) {
+                mount.innerHTML = `<div class="p-3 text-danger small">${e.message}</div>`;
+            }
+        }
+
+        async function loadExpiring() {
+            const mount = document.getElementById('expiryMount');
+            try {
+                const res = await apiRequest('inventory.php?action=expiring');
+                const soon = res.data.expiring_soon || [];
+
+                if (soon.length === 0) {
+                    mount.innerHTML = `<div class="text-center py-4 text-muted small"><i class="bi bi-snow text-info me-1"></i>All stored inventory units are fresh.</div>`;
+                    return;
+                }
+
+                mount.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Bag Code</th>
+                                    <th>Group</th>
+                                    <th>Location</th>
+                                    <th>Days Left</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${soon.map(b => `
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-light text-dark border barcode-badge" onclick="openJourneyModal('${b.bag_code}')">
+                                                ${b.bag_code}
+                                            </span>
+                                        </td>
+                                        <td><span class="badge bg-dark">${b.group_name}</span></td>
+                                        <td>${b.storage_location}</td>
+                                        <td class="fw-bold text-danger">${b.days_remaining}d</td>
+                                        <td>
+                                            <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="discardBag(${b.inventory_id}, '${b.bag_code}')">
+                                                Discard
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (e) {
+                mount.innerHTML = `<div class="p-3 text-danger small">${e.message}</div>`;
+            }
+        }
+
+        async function loadMatrix() {
+            const mount = document.getElementById('matrixMount');
+            try {
+                const res = await apiRequest('requests.php?action=matrix');
+                const rows = res.data || [];
+
+                mount.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Blood Group</th>
+                                    <th>Viable Available Units</th>
+                                    <th>Total Requisition Demand</th>
+                                    <th>Emergency Active Demand</th>
+                                    <th>Net Balance</th>
+                                    <th>Supply Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows.map(r => `
+                                    <tr>
+                                        <td class="fw-bold fs-6">${r.group_name}</td>
+                                        <td class="fw-bold text-success">${r.available_units} units</td>
+                                        <td>${r.requested_units} units</td>
+                                        <td class="${r.emergency_demand > 0 ? 'text-danger fw-bold' : 'text-muted'}">${r.emergency_demand} units</td>
+                                        <td class="fw-bold ${r.net_difference < 0 ? 'text-danger' : 'text-success'}">
+                                            ${r.net_difference > 0 ? '+' : ''}${r.net_difference}
+                                        </td>
+                                        <td><span class="badge ${r.badge_class}">${r.balance_status}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (e) {
+                mount.innerHTML = `<div class="p-3 text-danger small">${e.message}</div>`;
+            }
+        }
+
+        function openIssueModal(reqId, patient, hospital, bloodGroup, units) {
+            currentIssueRequestId = reqId;
+            document.getElementById('modalReqId').innerText = `#REQ-${reqId}`;
+            document.getElementById('modalPatient').innerText = `${patient} (${hospital})`;
+            document.getElementById('modalBloodGroup').innerText = bloodGroup;
+            document.getElementById('modalUnits').innerText = `${units} Unit(s)`;
+            document.getElementById('modalAlertMount').innerHTML = '';
+
+            const modal = new bootstrap.Modal(document.getElementById('issueModal'));
+            modal.show();
+        }
+
+        async function submitIssuanceTransaction() {
+            if (!currentIssueRequestId) return;
+            const btn = document.getElementById('confirmIssueBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>Executing ACID Transaction...`;
+
+            const remarks = document.getElementById('modalRemarks').value.trim();
+            const alertMount = document.getElementById('modalAlertMount');
+
+            try {
+                const res = await apiRequest('requests.php?action=issue', 'POST', {
+                    request_id: currentIssueRequestId,
+                    remarks: remarks
+                });
+
+                alertMount.innerHTML = `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle me-1"></i>${res.message}</div>`;
+                showToast('ACID transaction committed successfully!', 'success');
+
+                setTimeout(() => {
+                    const modalEl = document.getElementById('issueModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) modalInstance.hide();
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="bi bi-check-circle me-1"></i>Commit Transaction`;
+                    
+                    // Refresh dashboard views
+                    loadKPIs();
+                    loadTriage();
+                    loadMatrix();
+                    initDashboardCharts();
+                }, 1000);
+            } catch (err) {
+                alertMount.innerHTML = `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-exclamation-triangle me-1"></i>${err.message}</div>`;
+                btn.disabled = false;
+                btn.innerHTML = `<i class="bi bi-check-circle me-1"></i>Commit Transaction`;
+            }
+        }
+
+        async function discardBag(invId, code) {
+            if (!confirm(`Are you sure you want to mark unit ${code} as DISCARDED?`)) return;
+            try {
+                const res = await apiRequest('inventory.php?action=discard', 'POST', { inventory_id: invId });
+                showToast(res.message, 'info');
+                loadKPIs();
+                loadExpiring();
+            } catch (e) {
+                showToast(e.message, 'danger');
+            }
+        }
+    </script>
+</body>
+</html>

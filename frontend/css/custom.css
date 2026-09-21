@@ -1,0 +1,220 @@
+/* ==========================================================================
+   LifeLink Blood Bank Management System - Custom Healthcare Styles
+   Theme: Modern Clinical / 2026 Medical Tech
+   ========================================================================== */
+
+:root {
+    --primary-red: #DC2626;
+    --primary-dark: #991B1B;
+    --primary-light: #FEE2E2;
+    --medical-blue: #0284C7;
+    --medical-teal: #0D9488;
+    --bg-main: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --border-color: #E2E8F0;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-icon {
+    color: var(--primary-red);
+    font-size: 1.5rem;
+    animation: pulse 2s infinite ease-in-out;
+}
+
+/* Pulse animation for medical icon & emergency alerts */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.pulsing-badge {
+    animation: pulse 1.5s infinite;
+}
+
+/* Cards & Containers */
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    background-color: var(--bg-card);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+/* Radar Grid Cards */
+.radar-card {
+    border-radius: 0.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.radar-card.critical {
+    border-top: 4px solid #EF4444;
+    background: linear-gradient(180deg, #FEF2F2 0%, #FFFFFF 100%);
+}
+
+.radar-card.low {
+    border-top: 4px solid #F59E0B;
+    background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 100%);
+}
+
+.radar-card.available {
+    border-top: 4px solid #10B981;
+    background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%);
+}
+
+.radar-blood-group {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.radar-units {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* Badges */
+.badge-critical {
+    background-color: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #FCA5A5;
+}
+
+.badge-low {
+    background-color: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FCD34D;
+}
+
+.badge-available {
+    background-color: #DCFCE7;
+    color: #166534;
+    border: 1px solid #86EFAC;
+}
+
+.badge-emergency {
+    background-color: #DC2626;
+    color: #FFFFFF;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Blood Journey Stepper Modal */
+.journey-stepper {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 2rem 0;
+}
+
+.journey-stepper::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    left: 40px;
+    right: 40px;
+    height: 4px;
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.journey-step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+}
+
+.journey-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    border: 3px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem auto;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.journey-step.completed .journey-icon-wrap {
+    border-color: #10B981;
+    background-color: #ECFDF5;
+    color: #059669;
+}
+
+.journey-step.active .journey-icon-wrap {
+    border-color: var(--primary-red);
+    background-color: var(--primary-light);
+    color: var(--primary-red);
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+
+.journey-step-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.journey-step-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Interactive elements */
+.barcode-badge {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.barcode-badge:hover {
+    text-decoration: underline;
+}
+
+/* Footer */
+footer {
+    border-top: 1px solid var(--border-color);
+    background-color: #FFFFFF;
+}

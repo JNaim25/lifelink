@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Directory | LifeLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div id="navbar-mount"></div>
+
+    <main class="container-fluid px-lg-4 py-4 flex-grow-1">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-people-fill text-danger me-2"></i>Voluntary Donor Directory</h2>
+                <p class="text-muted mb-0">Demonstrating SQL <code>LEFT JOIN</code>: includes all registered voluntary donors regardless of donation history</p>
+            </div>
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadDonors()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm bg-white">
+            <div class="card-body p-0" id="donorsMount">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-danger" role="status"></div>
+                    <div class="text-muted mt-2">Loading donor directory...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-mount"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/navbar.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadDonors);
+
+        async function loadDonors() {
+            const mount = document.getElementById('donorsMount');
+            try {
+                const res = await apiRequest('donors.php?action=list');
+                const list = res.data || [];
+
+                if (list.length === 0) {
+                    mount.innerHTML = `<div class="text-center py-5 text-muted small">No donors registered in system.</div>`;
+                    return;
+                }
+
+                mount.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th># Donor ID</th>
+                                    <th>Full Name</th>
+                                    <th>Blood Group</th>
+                                    <th>City</th>
+                                    <th>Contact Info</th>
+                                    <th>Last Donation</th>
+                                    <th>Total Donations (LEFT JOIN)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${list.map(d => `
+                                    <tr>
+                                        <td class="font-monospace fw-bold">#DNR-${d.donor_id}</td>
+                                        <td class="fw-bold">${d.full_name}</td>
+                                        <td><span class="badge bg-danger fs-6">${d.blood_group}</span></td>
+                                        <td>${d.city}</td>
+                                        <td>
+                                            <div><a href="tel:${d.phone}" class="text-decoration-none">${d.phone}</a></div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">${d.email}</div>
+                                        </td>
+                                        <td>${d.last_donation_date || '<span class="text-muted fst-italic">First-time voluntary</span>'}</td>
+                                        <td class="fw-bold fs-6">${d.total_donations} session(s)</td>
+                                        <td>
+                                            ${d.is_eligible ? 
+                                                '<span class="badge bg-success">ELIGIBLE</span>' : 
+                                                '<span class="badge bg-secondary">INELIGIBLE</span>'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                mount.innerHTML = `<div class="p-3 text-danger small">${err.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

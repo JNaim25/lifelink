@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLink - Blood Bank Management System | CSE 3522</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom Healthcare Styling -->
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- Global Dynamic Navigation Bar -->
+    <div id="navbar-mount"></div>
+
+    <main class="flex-grow-1">
+        <!-- Emergency Ticker (shown dynamically if active critical requisitions exist) -->
+        <div id="emergency-alert-banner" class="alert alert-danger mb-0 rounded-0 border-start-0 border-end-0 py-2 d-none">
+            <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger pulsing-badge"><i class="bi bi-exclamation-triangle-fill me-1"></i>CRITICAL</span>
+                    <span id="emergency-banner-text" class="fw-semibold text-danger">Emergency Blood Requisitions Active</span>
+                </div>
+                <a href="emergency.html" class="btn btn-danger btn-sm fw-bold">View Emergency Queue</a>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="py-5 bg-white border-bottom">
+            <div class="container">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7">
+                        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill bg-danger-subtle text-danger fw-semibold small">
+                            <i class="bi bi-heart-pulse-fill"></i> Next-Gen Relational Blood Bank Infrastructure
+                        </div>
+                        <h1 class="display-5 fw-bold text-dark mb-3">
+                            Smart Blood Banking & Transfusion Traceability
+                        </h1>
+                        <p class="lead text-secondary mb-4">
+                            LifeLink bridges donors, regional hospitals, and cold-chain storage with real-time ABO/Rh cross-matching, ACID-safe inventory transactions, and complete bio-traceability.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="search.html" class="btn btn-danger btn-lg px-4 shadow-sm">
+                                <i class="bi bi-search me-2"></i>Smart Match Search
+                            </a>
+                            <a href="emergency.html" class="btn btn-outline-danger btn-lg px-4 shadow-sm">
+                                <i class="bi bi-lightning-charge me-2"></i>Emergency Request
+                            </a>
+                            <a href="login.html" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card border-0 shadow-sm p-4 bg-light">
+                            <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-qr-code text-danger"></i> Serial Blood Bag Journey
+                            </h5>
+                            <p class="small text-muted mb-3">
+                                Enter any serial barcode or unit code to trace its full 5-stage chain of custody from donation through lab testing and hospital transfusion.
+                            </p>
+                            <form id="trackBagForm" onsubmit="handleTrackBagSubmit(event)">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="quickBagCode" class="form-control font-monospace" placeholder="e.g. BAG-2026-A199" required>
+                                    <button class="btn btn-danger" type="submit">Trace Journey</button>
+                                </div>
+                            </form>
+                            <div class="small text-muted">
+                                Demo Serial Bag Codes:
+                                <div class="d-flex gap-2 mt-1 flex-wrap">
+                                    <span class="badge bg-white text-dark border barcode-badge" onclick="openJourneyModal('BAG-2026-A199')">BAG-2026-A199</span>
+                                    <span class="badge bg-white text-dark border barcode-badge" onclick="openJourneyModal('BAG-2026-B001')">BAG-2026-B001</span>
+                                    <span class="badge bg-white text-dark border barcode-badge" onclick="openJourneyModal('BAG-2026-O002')">BAG-2026-O002</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature 3: Blood Availability Radar -->
+        <section class="py-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+                    <div>
+                        <div class="text-danger fw-bold text-uppercase small tracking-wide">Live Relational View</div>
+                        <h2 class="fw-bold mb-0">Blood Availability Radar</h2>
+                    </div>
+                    <div class="text-muted small">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Real-time data from <code>view_blood_availability</code>
+                    </div>
+                </div>
+
+                <div class="row g-3" id="radarGrid">
+                    <!-- Loaded dynamically via JavaScript -->
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-danger" role="status"></div>
+                        <div class="text-muted mt-2">Loading live inventory status...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Academic Capabilities -->
+        <section class="py-5 bg-white border-top border-bottom">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <div class="text-danger fw-bold text-uppercase small">DBMS CSE 3522 Implementation</div>
+                    <h2 class="fw-bold">Engineering Highlights</h2>
+                    <p class="text-muted col-lg-7 mx-auto">
+                        Developed to fulfill every academic DBMS requirement with industry-grade reliability and modular 3-tier architecture.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card h-100 p-3 text-center border-0 bg-light">
+                            <div class="fs-1 text-danger mb-2"><i class="bi bi-shield-lock-fill"></i></div>
+                            <h5 class="fw-bold">ACID Transactions</h5>
+                            <p class="small text-muted mb-0">
+                                Blood issuance uses <code>SELECT ... FOR UPDATE</code> with atomic <code>commit()</code> and automatic <code>rollBack()</code> to eliminate double-allocation.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card h-100 p-3 text-center border-0 bg-light">
+                            <div class="fs-1 text-primary mb-2"><i class="bi bi-crosshair"></i></div>
+                            <h5 class="fw-bold">Smart Blood Match</h5>
+                            <p class="small text-muted mb-0">
+                                Dynamic ABO/Rh compatibility algorithm with exact and alternative available unit calculation and eligible donor lookups.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card h-100 p-3 text-center border-0 bg-light">
+                            <div class="fs-1 text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
+                            <h5 class="fw-bold">90-Day Cooldown</h5>
+                            <p class="small text-muted mb-0">
+                                Date difference algorithms enforce clinical rest intervals between donations to ensure voluntary donor safety.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card h-100 p-3 text-center border-0 bg-light">
+                            <div class="fs-1 text-success mb-2"><i class="bi bi-snow2"></i></div>
+                            <h5 class="fw-bold">Cold-Chain Expiry</h5>
+                            <p class="small text-muted mb-0">
+                                35-day red cell countdown alerts medical officers before inventory expires, reducing wasted clinical resources.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Global Dynamic Footer -->
+    <div id="footer-mount"></div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Frontend JS Modules -->
+    <script src="js/api.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="js/journey_modal.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRadar();
+            checkEmergencyBanner();
+        });
+
+        function handleTrackBagSubmit(e) {
+            e.preventDefault();
+            const code = document.getElementById('quickBagCode').value.trim();
+            if (code) {
+                openJourneyModal(code);
+            }
+        }
+
+        async function checkEmergencyBanner() {
+            try {
+                const res = await apiRequest('emergency.php');
+                if (res.success && res.data && res.data.length > 0) {
+                    const banner = document.getElementById('emergency-alert-banner');
+                    const text = document.getElementById('emergency-banner-text');
+                    text.innerText = `Active Emergency Requisitions: ${res.data.length} critical requisition(s) requiring triage.`;
+                    banner.classList.remove('d-none');
+                }
+            } catch (e) {}
+        }
+
+        async function loadRadar() {
+            const grid = document.getElementById('radarGrid');
+            try {
+                const res = await apiRequest('radar.php');
+                if (!res.success) throw new Error(res.message);
+
+                grid.innerHTML = res.data.radar.map(item => {
+                    const statusClass = item.stock_status === 'CRITICAL' ? 'critical' : 
+                                        item.stock_status === 'LOW' ? 'low' : 'available';
+                    const badgeClass = item.stock_status === 'CRITICAL' ? 'badge-critical' : 
+                                       item.stock_status === 'LOW' ? 'badge-low' : 'badge-available';
+                    
+                    return `
+                        <div class="col-6 col-md-3">
+                            <div class="card p-3 radar-card ${statusClass}">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="radar-blood-group">${item.group_name}</span>
+                                    <span class="badge ${badgeClass}">${item.stock_status}</span>
+                                </div>
+                                <div class="radar-units text-dark mb-2">${item.available_units} <span class="fs-6 fw-normal text-muted">units</span></div>
+                                <div class="small text-muted" style="font-size: 0.75rem;">
+                                    <div><strong>Can Give:</strong> ${item.can_give_to}</div>
+                                    <div><strong>Can Receive:</strong> ${item.can_receive_from}</div>
+                                </div>
+                                <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small" style="font-size: 0.7rem;">Shelf Expiry: ${item.earliest_expiry || 'None'}</span>
+                                    <a href="search.html?blood_group_id=${item.blood_group_id}" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;">Match</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                grid.innerHTML = `<div class="col-12 alert alert-danger">Failed to load live radar: ${e.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

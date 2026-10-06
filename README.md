@@ -211,25 +211,25 @@ The database models the transfusion network using **7 normalized entities in Thi
 7. **Step 7 (Demand vs. Supply Balance)**: Scroll down to Feature #9 and explain how SQL subqueries compare live demand against stock.
 8. **Step 8 (Execute ACID Issuance Transaction)**: In **Blood Requests** (`frontend/admin_requests.html`), click **[Issue]** on the emergency ticket. Explain how PHP starts a PDO transaction (`$pdo->beginTransaction()`), locks viable bags with `FOR UPDATE`, logs issuances, updates bag status to `ISSUED`, marks the request `FULFILLED`, and commits.
 9. **Step 9 (Live Stock Recalculation)**: Return to the Radar on the homepage. Point out that available O- units have automatically decremented in MySQL.
-10. **Step 10 (SQL Analytics Page)**: Click **SQL Analytics & Reports** (`frontend/admin_reports.html`) to show analytical queries running live on MySQL (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `GROUP BY` + `HAVING`, Correlated Subqueries, Views, and Multi-Table `INNER JOIN`).
+10. **Step 10 (DBMS Showcase Page)**: Click **DBMS Queries Demo** (`frontend/admin_reports.html`) to show your examiner all mandatory syllabus queries running live on MySQL (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `GROUP BY` + `HAVING`, Correlated Subqueries, Views, and Multi-Table `INNER JOIN`).
 
 ---
 
-## 9. Engineering Modules & Architecture Responsibilities
+## 9. Group Member Work Distribution Matrix (4–5 Students)
 
-| Module | Core Responsibility | Entities Handled | Key Database Operations |
+| Member | Module Responsibility | Tables Handled | DBMS / SQL Operations Owned |
 | :--- | :--- | :--- | :--- |
-| **Authentication & User Directory** | Identity, Security & RBAC | `users`, `blood_groups` | DDL schema creation, PK/FK constraints, bcrypt password hashing, session RBAC. |
-| **Donor Management & Cooldown** | Intake Safety & Cooldown Enforcement | `donors`, `donations` | SQL `LEFT JOIN`, date interval arithmetic (90-day cooldown enforcement), donor profile. |
-| **Cold-Chain Inventory & Radar** | Serialized Unit Life & Storage | `blood_inventory`, `blood_groups` | `CREATE VIEW view_blood_availability`, `CREATE INDEX`, shelf-life alerts, `GROUP BY`. |
-| **Clinical Requisitions & Triage** | Hospital Demand & Priority Allocation | `blood_requests`, `blood_groups` | Emergency triage queue, request status workflow, DML `DELETE` cancellation. |
-| **Transactional Issuance Engine** | ACID Transfusion Allocation | `blood_issuances`, all tables | `$pdo->beginTransaction()`, `$pdo->commit()`, `$pdo->rollBack()`, `SELECT ... FOR UPDATE`, and Chart.js analytics. |
+| **Member 1** | Database Architecture & Auth | `users`, `blood_groups` | DDL schema creation, PK/FK constraints, bcrypt password hashing, session RBAC. |
+| **Member 2** | Donor Portal & 90-Day Cooldown | `donors`, `donations` | SQL `LEFT JOIN`, date interval arithmetic (cooldown calculation), donor profile. |
+| **Member 3** | Inventory & Expiry Radar | `blood_inventory`, `blood_groups` | `CREATE VIEW view_blood_availability`, `CREATE INDEX`, shelf-life alerts, `GROUP BY`. |
+| **Member 4** | Requests & Emergency Triage | `blood_requests`, `blood_groups` | Emergency triage queue, request status workflow, DML `DELETE` cancellation. |
+| **Member 5** | Issuance Engine & Analytics | `blood_issuances`, all tables | `$pdo->beginTransaction()`, `$pdo->commit()`, `$pdo->rollBack()`, `SELECT ... FOR UPDATE`, and Chart.js analytics. |
 
 ---
 
-## 10. Technical FAQ & Database Design Notes
+## 10. Viva Preparation: Questions & Answers
 
-### Q1: Why is the database designed in 3NF?
+### Q1: Why is your database in 3NF?
 > **Answer**: 
 > 1. It is in **1NF** because all column values are atomic and every table has a defined primary key.
 > 2. It is in **2NF** because all tables use single-column surrogate primary keys, so partial functional dependencies cannot exist.
@@ -239,10 +239,10 @@ The database models the transfusion network using **7 normalized entities in Thi
 > **Answer**: 
 > Blood issuance consists of multiple write operations: verifying stock, inserting audit records into `blood_issuances`, updating `blood_inventory.status = 'ISSUED'`, and updating `blood_requests.status = 'FULFILLED'`. If an error or system crash occurs mid-process, the database would become inconsistent (e.g. inventory decremented without an issuance record, or request fulfilled without allocated units). A database transaction guarantees **Atomicity**—either all operations commit together (`$pdo->commit()`), or all modifications are rolled back (`$pdo->rollBack()`).
 
-### Q3: Why is an index created on `blood_inventory(blood_group_id, status, expiry_date)`?
+### Q3: Why did you create an index on `blood_inventory(blood_group_id, status, expiry_date)`?
 > **Answer**: 
 > Blood search, Smart Blood Match, and issuance transactions frequently filter by `blood_group_id = ? AND status = 'AVAILABLE' AND expiry_date >= CURDATE() ORDER BY expiry_date ASC`. A composite B-Tree index satisfies this query via an index range scan in $O(\log N)$ time, eliminating a full table scan and avoiding an expensive filesort.
 
-### Q4: What is the purpose of the MySQL View?
+### Q4: What is the purpose of your MySQL View?
 > **Answer**: 
-> `view_blood_availability` pre-compiles real-time aggregation queries combining `COUNT()`, `SUM()`, `MIN(expiry_date)`, and `CASE` statements. It acts as an abstraction layer so that both the public homepage and admin dashboard query a clean, single relational view instead of repeating complex SQL aggregation logic across multiple scripts.
+> `view_blood_availability` pre-compiles real-time aggregation queries combining `COUNT()`, `SUM()`, `MIN(expiry_date)`, and `CASE` statements. It acts as an abstraction layer so that both our public homepage and admin dashboard query a clean, single relational view instead of repeating complex SQL aggregation logic across multiple scripts.

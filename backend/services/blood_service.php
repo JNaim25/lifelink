@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Blood Service
  * Master catalog, live radar view queries, and Smart Blood Match algorithms.

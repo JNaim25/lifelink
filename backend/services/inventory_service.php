@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Inventory Service
  * Manages serialized blood bags, shelf-life (35-day countdown), and cold-chain alerts.

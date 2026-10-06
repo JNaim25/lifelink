@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Journey API Endpoint
  * Provides 5-stage chain-of-custody traceability for any blood bag.

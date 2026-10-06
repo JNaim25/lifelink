@@ -1,11 +1,10 @@
 # LifeLink: Intelligent Blood Inventory & Traceability System
-### Course: Database Management Systems Laboratory (CSE 3522)
-### Department of Computer Science & Engineering
+### Enterprise Blood Banking & Transfusion Management Platform
 
 ---
 
 ## 1. Project Overview
-**LifeLink** is an enterprise-grade, database-driven blood bank management web application developed for the **CSE 3522 Database Management Systems Laboratory**. The system manages voluntary blood donors, cold-chain refrigerated inventory bags, emergency hospital blood requisitions, and administrative issuance workflows with referential integrity, real-time SQL aggregation, cold-chain shelf-life tracking, and ACID-compliant transaction processing using **MySQL (via XAMPP)**, **PHP 8.2 (PDO)**, and **HTML5/Bootstrap 5.3**.
+**LifeLink** is an enterprise-grade, database-driven blood bank management web application developed for modern hospital networks, voluntary donor systems, and clinical transfusion centers. The system manages voluntary blood donors, cold-chain refrigerated inventory bags, emergency hospital blood requisitions, and administrative issuance workflows with referential integrity, real-time SQL aggregation, cold-chain shelf-life tracking, and ACID-compliant transaction processing using **MySQL (via XAMPP)**, **PHP 8.2 (PDO)**, and **HTML5/Bootstrap 5.3**.
 
 The codebase is organized into a clean **3-tier modular architecture** across dedicated folders:
 * **`db/`**: Complete database tier containing SQL DDL/DML, views, composite indexes, sample seed data, and a one-command database reset utility.
@@ -25,7 +24,7 @@ lifelink/
 │   ├── views.sql             # MySQL Views (view_blood_availability, view_emergency_queue)
 │   ├── indexes.sql           # Composite B-tree indexes for query optimization
 │   ├── seed.sql              # Realistic clinical sample data & bcrypt credentials
-│   ├── queries_demo.sql      # Syllabus demonstration queries for viva inspection
+│   ├── queries_demo.sql      # Analytical SQL reference and benchmarking queries
 │   └── reset_db.php          # One-command database restoration script
 │
 ├── backend/                  # Backend Tier (PHP 8.2 PDO MySQL)
@@ -39,7 +38,7 @@ lifelink/
 │   │   ├── inventory_service.php # Serialized unit shelf-life (35-day) & cold-chain
 │   │   ├── request_service.php   # Requisition tickets & demand-vs-supply matrix
 │   │   ├── issuance_service.php  # ACID transaction execution & The Blood Journey
-│   │   └── donor_service.php     # Donor intake & 90-day cooldown calculation
+│   │   └── donor_service.php     # Donor intake & 90-day cooldown enforcement
 │   └── api/
 │       ├── auth.php          # User login, registration, session me, logout
 │       ├── radar.php         # Real-time stock radar view endpoint
@@ -49,8 +48,8 @@ lifelink/
 │       ├── requests.php      # Requisitions CRUD & ACID issuance transaction
 │       ├── inventory.php     # Serialized bag registry, expiry alerts, discard
 │       ├── donations.php     # Clinical intake sessions & inventory bag spawner
-│       ├── donors.php        # Complete donor directory (SQL LEFT JOIN)
-│       └── reports.php       # Live DBMS syllabus benchmark query runner
+│       ├── donors.php        # Complete donor directory (SQL LEFT JOIN & cooldown)
+│       └── reports.php       # Live analytical benchmark query runner
 │
 ├── frontend/                 # Frontend Tier (Pure HTML, CSS, JS)
 │   ├── css/
@@ -71,15 +70,15 @@ lifelink/
 │   ├── admin_dashboard.html  # Feature 8 & 9: KPIs, Triage, Cold-Chain Alerts
 │   ├── admin_inventory.html  # Unit-level serialized inventory bag management
 │   ├── admin_requests.html   # Requisition queue & Feature 7 ACID Issuance
-│   ├── admin_donations.html  # Donor intake session logger
+│   ├── admin_donations.html  # Donor intake session logger with 90-day cooldown rule
 │   ├── admin_donors.html     # Feature 10: Complete donor directory (LEFT JOIN)
-│   └── admin_reports.html    # Interactive DBMS syllabus demonstrator
+│   └── admin_reports.html    # Interactive SQL analytics & query demonstrator
 │
 ├── back                      # NTFS Directory Junction pointing to backend/
 ├── front                     # NTFS Directory Junction pointing to frontend/
 ├── index.html                # Project root entry redirecting to frontend/index.html
 ├── index.php                 # Project root router redirecting to frontend/index.html
-└── README.md                 # Project technical documentation & viva guide
+└── README.md                 # Project technical documentation & deployment guide
 ```
 
 ---
@@ -102,7 +101,7 @@ The database models the transfusion network using **7 normalized entities in Thi
 +-----------------------------------------------------------------------------------+
 ```
 
-### Academic Normalization Proof:
+### Relational Normalization Proof:
 * **First Normal Form (1NF)**:
   * Every attribute holds atomic (scalar) values.
   * No multi-valued attributes or repeating groups.
@@ -118,9 +117,9 @@ The database models the transfusion network using **7 normalized entities in Thi
 
 ---
 
-## 4. SQL Requirements-to-Feature Mapping
+## 4. SQL Capabilities-to-Feature Mapping
 
-| DBMS Requirement | Application Feature | Concrete SQL Query / Implementation |
+| Relational Capability | Application Feature | Concrete SQL Query / Implementation |
 | :--- | :--- | :--- |
 | **SELECT** | Blood Search & Radar | `SELECT bg.group_name, COUNT(bi.inventory_id) FROM blood_groups bg ...` |
 | **INSERT** | Bag Registration & Donation | `INSERT INTO blood_inventory (bag_code, blood_group_id, ...) VALUES (...)` |
@@ -145,7 +144,7 @@ The database models the transfusion network using **7 normalized entities in Thi
 2. **Emergency Blood Request Triage**: High-priority requisition queue with pulsing visual alerts for trauma cases.
 3. **Blood Availability Radar**: Real-time 8-card inventory grid powered by MySQL View `view_blood_availability`.
 4. **Cold-Chain Expiry Warning**: Automated detection of blood units expiring within $\le 7$ days to prevent clinical wastage.
-5. **Donor 90-Day Cooldown Tracker**: Progress bar computing days remaining before the next medically safe donation.
+5. **Donor 90-Day Cooldown Tracker & Policy Enforcement**: Donors can give blood, but once blood is collected, a mandatory 90-day clinical rest period is enforced. The donor is unavailable for intake until 90 days elapse.
 6. **The Signature "Blood Journey"**: Interactive 5-stage visual stepper tracking any bag:
    $$\text{Donor Intake} \longrightarrow \text{Collection} \longrightarrow \text{Cold Storage} \longrightarrow \text{Hospital Requisition} \longrightarrow \text{Transfusion Issuance}$$
 7. **Transaction-Based Blood Issuance**: Multi-step ACID execution with automatic rollback on stock deficit.
@@ -193,7 +192,7 @@ The database models the transfusion network using **7 normalized entities in Thi
 
 | Role | Email Address | Password | Purpose in Demo |
 | :--- | :--- | :--- | :--- |
-| **System Admin** | `admin@lifelink.org` | `Admin@123` | Control center, emergency triage, and ACID issuance transaction |
+| **System Admin** | `admin@lifelink.org` | `Admin@123` | Control center, emergency triage, intake sessions, and ACID issuance transaction |
 | **Volunteer Donor** | `donor1@gmail.com` | `Password@123` | Donor profile, 90-day cooldown interval bar, and past donation history |
 | **Hospital Requester** | `requester1@hospital.org` | `Password@123` | Hospital blood requisition, ticket tracking, cancellation |
 
@@ -201,7 +200,7 @@ The database models the transfusion network using **7 normalized entities in Thi
 
 ---
 
-## 8. 10-Step Viva & Inspection Presentation Script
+## 8. 10-Step Feature Walkthrough & Demonstration Guide
 
 1. **Step 1 (Homepage Showcase)**: Open `http://127.0.0.1:5000/frontend/index.html`. Point out the healthcare UI, system metrics, and the Live Blood Availability Radar powered by MySQL View `view_blood_availability`.
 2. **Step 2 (Smart Blood Match)**: Click **Smart Blood Match** (`frontend/search.html`), select B+, enter 2 units. Show exact match units and compatible substitute units with live shelf-life countdowns.
@@ -212,25 +211,25 @@ The database models the transfusion network using **7 normalized entities in Thi
 7. **Step 7 (Demand vs. Supply Balance)**: Scroll down to Feature #9 and explain how SQL subqueries compare live demand against stock.
 8. **Step 8 (Execute ACID Issuance Transaction)**: In **Blood Requests** (`frontend/admin_requests.html`), click **[Issue]** on the emergency ticket. Explain how PHP starts a PDO transaction (`$pdo->beginTransaction()`), locks viable bags with `FOR UPDATE`, logs issuances, updates bag status to `ISSUED`, marks the request `FULFILLED`, and commits.
 9. **Step 9 (Live Stock Recalculation)**: Return to the Radar on the homepage. Point out that available O- units have automatically decremented in MySQL.
-10. **Step 10 (DBMS Showcase Page)**: Click **DBMS Queries Demo** (`frontend/admin_reports.html`) to show your examiner all mandatory syllabus queries running live on MySQL (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `GROUP BY` + `HAVING`, Correlated Subqueries, Views, and Multi-Table `INNER JOIN`).
+10. **Step 10 (SQL Analytics Page)**: Click **SQL Analytics & Reports** (`frontend/admin_reports.html`) to show analytical queries running live on MySQL (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `GROUP BY` + `HAVING`, Correlated Subqueries, Views, and Multi-Table `INNER JOIN`).
 
 ---
 
-## 9. Group Member Work Distribution Matrix (4–5 Students)
+## 9. Engineering Modules & Architecture Responsibilities
 
-| Member | Module Responsibility | Tables Handled | DBMS / SQL Operations Owned |
+| Module | Core Responsibility | Entities Handled | Key Database Operations |
 | :--- | :--- | :--- | :--- |
-| **Member 1** | Database Architecture & Auth | `users`, `blood_groups` | DDL schema creation, PK/FK constraints, bcrypt password hashing, session RBAC. |
-| **Member 2** | Donor Portal & 90-Day Cooldown | `donors`, `donations` | SQL `LEFT JOIN`, date interval arithmetic (cooldown calculation), donor profile. |
-| **Member 3** | Inventory & Expiry Radar | `blood_inventory`, `blood_groups` | `CREATE VIEW view_blood_availability`, `CREATE INDEX`, shelf-life alerts, `GROUP BY`. |
-| **Member 4** | Requests & Emergency Triage | `blood_requests`, `blood_groups` | Emergency triage queue, request status workflow, DML `DELETE` cancellation. |
-| **Member 5** | Issuance Engine & Analytics | `blood_issuances`, all tables | `$pdo->beginTransaction()`, `$pdo->commit()`, `$pdo->rollBack()`, `SELECT ... FOR UPDATE`, and Chart.js analytics. |
+| **Authentication & User Directory** | Identity, Security & RBAC | `users`, `blood_groups` | DDL schema creation, PK/FK constraints, bcrypt password hashing, session RBAC. |
+| **Donor Management & Cooldown** | Intake Safety & Cooldown Enforcement | `donors`, `donations` | SQL `LEFT JOIN`, date interval arithmetic (90-day cooldown enforcement), donor profile. |
+| **Cold-Chain Inventory & Radar** | Serialized Unit Life & Storage | `blood_inventory`, `blood_groups` | `CREATE VIEW view_blood_availability`, `CREATE INDEX`, shelf-life alerts, `GROUP BY`. |
+| **Clinical Requisitions & Triage** | Hospital Demand & Priority Allocation | `blood_requests`, `blood_groups` | Emergency triage queue, request status workflow, DML `DELETE` cancellation. |
+| **Transactional Issuance Engine** | ACID Transfusion Allocation | `blood_issuances`, all tables | `$pdo->beginTransaction()`, `$pdo->commit()`, `$pdo->rollBack()`, `SELECT ... FOR UPDATE`, and Chart.js analytics. |
 
 ---
 
-## 10. Viva Preparation: Questions & Answers
+## 10. Technical FAQ & Database Design Notes
 
-### Q1: Why is your database in 3NF?
+### Q1: Why is the database designed in 3NF?
 > **Answer**: 
 > 1. It is in **1NF** because all column values are atomic and every table has a defined primary key.
 > 2. It is in **2NF** because all tables use single-column surrogate primary keys, so partial functional dependencies cannot exist.
@@ -240,10 +239,10 @@ The database models the transfusion network using **7 normalized entities in Thi
 > **Answer**: 
 > Blood issuance consists of multiple write operations: verifying stock, inserting audit records into `blood_issuances`, updating `blood_inventory.status = 'ISSUED'`, and updating `blood_requests.status = 'FULFILLED'`. If an error or system crash occurs mid-process, the database would become inconsistent (e.g. inventory decremented without an issuance record, or request fulfilled without allocated units). A database transaction guarantees **Atomicity**—either all operations commit together (`$pdo->commit()`), or all modifications are rolled back (`$pdo->rollBack()`).
 
-### Q3: Why did you create an index on `blood_inventory(blood_group_id, status, expiry_date)`?
+### Q3: Why is an index created on `blood_inventory(blood_group_id, status, expiry_date)`?
 > **Answer**: 
 > Blood search, Smart Blood Match, and issuance transactions frequently filter by `blood_group_id = ? AND status = 'AVAILABLE' AND expiry_date >= CURDATE() ORDER BY expiry_date ASC`. A composite B-Tree index satisfies this query via an index range scan in $O(\log N)$ time, eliminating a full table scan and avoiding an expensive filesort.
 
-### Q4: What is the purpose of your MySQL View?
+### Q4: What is the purpose of the MySQL View?
 > **Answer**: 
-> `view_blood_availability` pre-compiles real-time aggregation queries combining `COUNT()`, `SUM()`, `MIN(expiry_date)`, and `CASE` statements. It acts as an abstraction layer so that both our public homepage and admin dashboard query a clean, single relational view instead of repeating complex SQL aggregation logic across multiple scripts.
+> `view_blood_availability` pre-compiles real-time aggregation queries combining `COUNT()`, `SUM()`, `MIN(expiry_date)`, and `CASE` statements. It acts as an abstraction layer so that both the public homepage and admin dashboard query a clean, single relational view instead of repeating complex SQL aggregation logic across multiple scripts.

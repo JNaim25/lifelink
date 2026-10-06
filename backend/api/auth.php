@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Auth API Endpoint
  * Handles login, registration, session status, and logout.

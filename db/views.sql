@@ -1,6 +1,5 @@
 -- ============================================================================
 -- LIFELINK REUSABLE DATABASE VIEWS
--- Course: Database Management Systems Laboratory (CSE 3522)
 -- Demonstrates: SQL Views, Aggregation (COUNT, SUM, MIN), CASE expressions
 -- ============================================================================
 

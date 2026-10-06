@@ -16,7 +16,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <div>
                 <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-people-fill text-danger me-2"></i>Voluntary Donor Directory</h2>
-                <p class="text-muted mb-0">Demonstrating SQL <code>LEFT JOIN</code>: includes all registered voluntary donors regardless of donation history</p>
+                <p class="text-muted mb-0">Registered voluntary donors with medical profiles, lifetime donation counts, and live 90-day cooldown status</p>
             </div>
             <button class="btn btn-outline-secondary btn-sm" onclick="loadDonors()">
                 <i class="bi bi-arrow-clockwise me-1"></i>Refresh
@@ -64,30 +64,37 @@
                                     <th>City</th>
                                     <th>Contact Info</th>
                                     <th>Last Donation</th>
-                                    <th>Total Donations (LEFT JOIN)</th>
-                                    <th>Status</th>
+                                    <th>Total Donations</th>
+                                    <th>90-Day Cooldown Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${list.map(d => `
-                                    <tr>
-                                        <td class="font-monospace fw-bold">#DNR-${d.donor_id}</td>
-                                        <td class="fw-bold">${d.full_name}</td>
-                                        <td><span class="badge bg-danger fs-6">${d.blood_group}</span></td>
-                                        <td>${d.city}</td>
-                                        <td>
-                                            <div><a href="tel:${d.phone}" class="text-decoration-none">${d.phone}</a></div>
-                                            <div class="text-muted" style="font-size: 0.75rem;">${d.email}</div>
-                                        </td>
-                                        <td>${d.last_donation_date || '<span class="text-muted fst-italic">First-time voluntary</span>'}</td>
-                                        <td class="fw-bold fs-6">${d.total_donations} session(s)</td>
-                                        <td>
-                                            ${d.is_eligible ? 
-                                                '<span class="badge bg-success">ELIGIBLE</span>' : 
-                                                '<span class="badge bg-secondary">INELIGIBLE</span>'}
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                                ${list.map(d => {
+                                    let statusBadge = '';
+                                    if (!d.is_eligible) {
+                                        statusBadge = '<span class="badge bg-secondary">INELIGIBLE</span>';
+                                    } else if (d.can_donate) {
+                                        statusBadge = '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>ELIGIBLE TO DONATE</span>';
+                                    } else {
+                                        statusBadge = `<span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i>COOLDOWN (${d.days_until_eligible}d left until ${d.next_eligible_date})</span>`;
+                                    }
+
+                                    return `
+                                        <tr>
+                                            <td class="font-monospace fw-bold">#DNR-${d.donor_id}</td>
+                                            <td class="fw-bold">${d.full_name}</td>
+                                            <td><span class="badge bg-danger fs-6">${d.blood_group}</span></td>
+                                            <td>${d.city}</td>
+                                            <td>
+                                                <div><a href="tel:${d.phone}" class="text-decoration-none">${d.phone}</a></div>
+                                                <div class="text-muted" style="font-size: 0.75rem;">${d.email}</div>
+                                            </td>
+                                            <td>${d.last_donation_date || '<span class="text-muted fst-italic">First-time voluntary</span>'}</td>
+                                            <td class="fw-bold fs-6">${d.total_donations} session(s)</td>
+                                            <td>${statusBadge}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>

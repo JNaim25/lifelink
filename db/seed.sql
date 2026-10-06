@@ -1,6 +1,5 @@
 -- ============================================================================
 -- LIFELINK COMPREHENSIVE SAMPLE / SEED DATA
--- Course: Database Management Systems Laboratory (CSE 3522)
 -- Note: Dates are calculated relative to CURDATE() so sample data is ALWAYS
 --       fresh and valid whenever evaluated or demonstrated to examiners.
 -- Passwords:

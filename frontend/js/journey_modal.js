@@ -1,6 +1,5 @@
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Feature 6: The Blood Journey (Interactive 5-Stage Stepper Modal)
  */

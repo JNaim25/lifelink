@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Search API Endpoint (Smart Blood Match)
  * Executes ABO/Rh cross-compatibility and inventory/donor matching.

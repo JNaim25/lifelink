@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Donations API Endpoint
  * Handles intake sessions, auto-generation of inventory bags, and donation history.
@@ -82,6 +81,12 @@ if ($method === 'POST') {
         jsonError('Valid donor must be selected.');
     }
 
+    // Verify 90-day cooldown before proceeding
+    $cooldownCheck = checkDonorCooldown($donorId);
+    if (!$cooldownCheck['can_donate']) {
+        jsonError($cooldownCheck['message'], 400);
+    }
+
     if ($bloodGroupId <= 0) {
         // Look up donor's registered blood group
         $donor = queryOne("SELECT blood_group_id FROM donors WHERE donor_id = ?", [$donorId]);
@@ -106,8 +111,8 @@ if ($method === 'POST') {
             'donation_id' => $donationId,
             'bag_code' => $bagCode,
             'storage_location' => $storageLocation
-        ], "Donation session recorded successfully! Bag {$bagCode} added to inventory.");
+        ], "Donation session recorded successfully! Bag {$bagCode} added to inventory. 90-day cooldown activated.");
     } catch (Exception $e) {
-        jsonError('Failed to record donation session: ' . $e->getMessage(), 500);
+        jsonError('Failed to record donation session: ' . $e->getMessage(), 400);
     }
 }

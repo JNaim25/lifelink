@@ -1,6 +1,5 @@
 -- ============================================================================
--- LIFELINK DBMS LABORATORY QUERIES SHOWCASE & VIVA CHEAT-SHEET
--- Course: Database Management Systems Laboratory (CSE 3522)
+-- LIFELINK RELATIONAL DATABASE QUERIES & ANALYTICS REFERENCE
 -- Database: blood_bank_db
 -- ============================================================================
 

@@ -16,11 +16,20 @@
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <div>
                 <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-droplet-fill text-danger me-2"></i>Donation Sessions & Blood Intake</h2>
-                <p class="text-muted mb-0">Record clinical intake sessions; system automatically generates serialized inventory bags and updates cooldown</p>
+                <p class="text-muted mb-0">Record clinical intake sessions with automatic serialized bag generation and mandatory 90-day cooldown enforcement</p>
             </div>
             <button class="btn btn-danger fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#newSessionModal">
                 <i class="bi bi-plus-circle me-1"></i>Record Intake Session
             </button>
+        </div>
+
+        <!-- 90-Day Cooldown Policy Banner -->
+        <div class="alert alert-info py-2 px-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-sm border-0">
+            <div class="d-flex align-items-center gap-2 small">
+                <i class="bi bi-shield-check fs-5 text-primary"></i>
+                <span><strong>Clinical Safety Rule:</strong> When blood is collected from a donor, a 90-day cooldown is automatically activated. The donor will not be available for further donations until the 90-day period expires.</span>
+            </div>
+            <span class="badge bg-primary">90-Day Cooldown Active</span>
         </div>
 
         <div class="card border-0 shadow-sm bg-white">
@@ -41,7 +50,7 @@
 
     <!-- Modal: Record Donation Session -->
     <div class="modal fade" id="newSessionModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title fw-bold"><i class="bi bi-heart-pulse-fill me-2"></i>Record Clinical Intake Session</h5>
@@ -49,14 +58,22 @@
                 </div>
                 <form id="sessionForm" onsubmit="handleSessionSubmit(event)">
                     <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Select Registered Donor <span class="text-danger">*</span></label>
-                            <select id="donorSelect" class="form-select" required>
-                                <option value="">Loading donor directory...</option>
-                            </select>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold mb-0">Select Registered Donor <span class="text-danger">*</span></label>
+                            <div class="form-check form-switch small">
+                                <input class="form-check-input" type="checkbox" id="eligibleOnlySwitch" checked onchange="renderDonorSelectOptions()">
+                                <label class="form-check-label" for="eligibleOnlySwitch">Show eligible only (cooldown cleared)</label>
+                            </div>
                         </div>
 
-                        <div class="row g-2 mb-3">
+                        <select id="donorSelect" class="form-select form-select-lg mb-2" required onchange="handleDonorSelectChange()">
+                            <option value="">Loading donor directory...</option>
+                        </select>
+
+                        <!-- Selected Donor Cooldown Status Indicator -->
+                        <div id="selectedDonorStatusMount" class="mb-3"></div>
+
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Blood Pressure (mmHg) <span class="text-danger">*</span></label>
                                 <input type="text" id="bp" class="form-control" value="120/80" required>
@@ -75,6 +92,11 @@
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Clinical Staff Remarks</label>
                             <textarea id="remarks" class="form-control" rows="2" placeholder="Standard whole blood donation; vitals normal."></textarea>
+                        </div>
+
+                        <div class="alert alert-warning py-2 px-3 small mb-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle-fill fs-5 text-warning"></i>
+                            <div><strong>Notice:</strong> Submitting this intake session will immediately lock this donor into a 90-day cooldown interval starting today.</div>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
@@ -96,20 +118,89 @@
     <script src="js/journey_modal.js"></script>
 
     <script>
+        let cachedDonors = [];
+
         document.addEventListener('DOMContentLoaded', function() {
             loadDonations();
-            loadDonorsDropdown();
+            loadDonors();
         });
 
-        async function loadDonorsDropdown() {
-            const select = document.getElementById('donorSelect');
+        async function loadDonors() {
             try {
                 const res = await apiRequest('donors.php?action=list');
-                const list = res.data || [];
-                select.innerHTML = `<option value="">-- Choose Voluntary Donor --</option>` + 
-                    list.map(d => `<option value="${d.donor_id}">${d.full_name} (${d.blood_group} - ${d.city})</option>`).join('');
+                cachedDonors = res.data || [];
+                renderDonorSelectOptions();
             } catch (e) {
-                select.innerHTML = `<option value="">Failed to load donors</option>`;
+                document.getElementById('donorSelect').innerHTML = `<option value="">Failed to load donors</option>`;
+            }
+        }
+
+        function renderDonorSelectOptions() {
+            const select = document.getElementById('donorSelect');
+            const showOnlyEligible = document.getElementById('eligibleOnlySwitch').checked;
+            
+            let filtered = cachedDonors;
+            if (showOnlyEligible) {
+                filtered = cachedDonors.filter(d => d.can_donate);
+            }
+
+            if (filtered.length === 0) {
+                select.innerHTML = `<option value="">-- No eligible donors found (all under cooldown) --</option>`;
+                handleDonorSelectChange();
+                return;
+            }
+
+            select.innerHTML = `<option value="">-- Choose Voluntary Donor --</option>` + 
+                filtered.map(d => {
+                    if (d.can_donate) {
+                        return `<option value="${d.donor_id}" data-eligible="true">${d.full_name} (${d.blood_group} - Eligible / Ready to Donate)</option>`;
+                    } else {
+                        return `<option value="${d.donor_id}" data-eligible="false" disabled class="text-danger">${d.full_name} (${d.blood_group} - Cooldown: ${d.days_until_eligible}d left until ${d.next_eligible_date})</option>`;
+                    }
+                }).join('');
+
+            handleDonorSelectChange();
+        }
+
+        function handleDonorSelectChange() {
+            const select = document.getElementById('donorSelect');
+            const statusMount = document.getElementById('selectedDonorStatusMount');
+            const saveBtn = document.getElementById('saveSessionBtn');
+            const selectedId = parseInt(select.value, 10);
+
+            if (!selectedId) {
+                statusMount.innerHTML = '';
+                saveBtn.disabled = false;
+                return;
+            }
+
+            const donor = cachedDonors.find(d => d.donor_id === selectedId);
+            if (!donor) return;
+
+            if (donor.can_donate) {
+                statusMount.innerHTML = `
+                    <div class="alert alert-success py-2 px-3 small mb-0 d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                            <strong>${donor.full_name} (${donor.blood_group})</strong> is cleared for intake.
+                            <div class="text-muted">Last donation: ${donor.last_donation_date || 'First-time voluntary donor'}</div>
+                        </div>
+                        <span class="badge bg-success">Eligible to Donate</span>
+                    </div>
+                `;
+                saveBtn.disabled = false;
+            } else {
+                statusMount.innerHTML = `
+                    <div class="alert alert-danger py-2 px-3 small mb-0 d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="bi bi-x-circle-fill text-danger me-1"></i>
+                            <strong>${donor.full_name}</strong> is in 90-day cooldown!
+                            <div class="text-muted">Last donated on ${donor.last_donation_date}. Eligible on ${donor.next_eligible_date} (${donor.days_until_eligible} days left).</div>
+                        </div>
+                        <span class="badge bg-danger">In Cooldown</span>
+                    </div>
+                `;
+                saveBtn.disabled = true;
             }
         }
 
@@ -136,6 +227,7 @@
                                     <th>Vitals (BP / Hb)</th>
                                     <th>Generated Bag Code</th>
                                     <th>Remarks</th>
+                                    <th>Cooldown Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -159,6 +251,9 @@
                                         </td>
                                         <td>${d.remarks || 'Standard'}</td>
                                         <td>
+                                            <span class="badge bg-info text-dark"><i class="bi bi-clock-history me-1"></i>90-Day Active</span>
+                                        </td>
+                                        <td>
                                             ${d.bag_code ? `
                                                 <button class="btn btn-outline-secondary btn-sm py-0 px-2" onclick="openJourneyModal('${d.bag_code}')">
                                                     <i class="bi bi-arrow-repeat me-1"></i>Trace
@@ -178,11 +273,23 @@
 
         async function handleSessionSubmit(e) {
             e.preventDefault();
+            const donorId = document.getElementById('donorSelect').value;
+            if (!donorId) {
+                showToast('Please select an eligible donor.', 'warning');
+                return;
+            }
+
+            const donor = cachedDonors.find(d => d.donor_id == donorId);
+            if (donor && !donor.can_donate) {
+                showToast(`Cannot proceed: ${donor.full_name} is under 90-day cooldown (${donor.days_until_eligible} days remaining).`, 'danger');
+                return;
+            }
+
             const btn = document.getElementById('saveSessionBtn');
             btn.disabled = true;
 
             const payload = {
-                donor_id: document.getElementById('donorSelect').value,
+                donor_id: donorId,
                 blood_pressure: document.getElementById('bp').value.trim(),
                 hemoglobin: document.getElementById('hb').value,
                 storage_location: document.getElementById('storageLocation').value.trim(),
@@ -194,7 +301,7 @@
                 showToast(res.message, 'success');
                 bootstrap.Modal.getInstance(document.getElementById('newSessionModal')).hide();
                 document.getElementById('sessionForm').reset();
-                loadDonations();
+                await Promise.all([loadDonations(), loadDonors()]);
             } catch (err) {
                 showToast(err.message, 'danger');
             } finally {

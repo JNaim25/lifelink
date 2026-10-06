@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Emergency Requisitions API Endpoint
  * Handles critical blood requisitions and live emergency queue broadcasting.

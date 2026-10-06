@@ -1,6 +1,5 @@
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Central API Client & Toast Notification Utility
  */

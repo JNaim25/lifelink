@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Database Configuration & Connection Manager
  * Uses PHP Data Objects (PDO) with automatic port failover (handles XAMPP 3307 & 3306).

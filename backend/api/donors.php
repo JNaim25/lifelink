@@ -1,10 +1,9 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Donors API Endpoint
- * Manages donor directory (demonstrating LEFT JOIN), profile, and cooldown checking.
+ * Manages donor directory, profile, and 90-day cooldown checking.
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -26,11 +25,24 @@ if ($method === 'GET') {
             jsonSuccess($donor);
             break;
 
+        case 'cooldown':
+            $donorId = isset($_GET['donor_id']) ? intval($_GET['donor_id']) : 0;
+            if ($donorId <= 0) {
+                jsonError('Valid donor_id is required.');
+            }
+            $cooldown = checkDonorCooldown($donorId);
+            jsonSuccess($cooldown);
+            break;
+
         case 'list':
         default:
             $currentUser = currentUser();
-            // Both ADMIN and authorized users can view donor directory
             $donors = getAllDonors();
+            if (isset($_GET['eligible_only']) && $_GET['eligible_only'] == '1') {
+                $donors = array_values(array_filter($donors, function($d) {
+                    return !empty($d['can_donate']);
+                }));
+            }
             jsonSuccess($donors, 'Donor directory retrieved successfully.');
             break;
     }

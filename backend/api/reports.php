@@ -1,10 +1,9 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
- * Reports & DBMS Demonstration API
- * Executes syllabus queries (Aggregations, Joins, Subqueries, Views, Indexes)
+ * Reports & Analytics API
+ * Executes analytical database queries (Aggregations, Joins, Subqueries, Views, Indexes)
  * and returns query execution time, formatted SQL, and dataset.
  */
 
@@ -180,7 +179,7 @@ try {
         foreach ($queries as $key => $q) {
             $allResults[$key] = executeBenchmarkedQuery($q['title'], $q['concept'], $q['sql']);
         }
-        jsonSuccess($allResults, 'All syllabus benchmark queries executed successfully.');
+        jsonSuccess($allResults, 'All analytical benchmark queries executed successfully.');
     }
 } catch (Exception $e) {
     jsonError('Query execution error: ' . $e->getMessage(), 500);

@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Database Reset Utility (PHP)
  * Re-executes schema.sql, views.sql, indexes.sql, and seed.sql to restore

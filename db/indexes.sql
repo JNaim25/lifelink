@@ -1,6 +1,5 @@
 -- ============================================================================
 -- LIFELINK MANUAL DATABASE INDEXES & OPTIMIZATION
--- Course: Database Management Systems Laboratory (CSE 3522)
 -- Demonstrates: CREATE INDEX, Query Plan Optimization, B-Tree Index Mechanics
 -- ============================================================================
 

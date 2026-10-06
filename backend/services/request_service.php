@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Request Service
  * Requisitions management, emergency triage queue, and demand-vs-supply matrix.

@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Inventory API Endpoint
  * Provides serialized blood bag inventory querying, cold-chain expiry alerts,

@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Issuance Service
  * Implements Feature 7 (ACID Transactional Issuance) and Feature 6 (The Blood Journey).
@@ -11,7 +10,7 @@ require_once __DIR__ . '/../config/database.php';
 
 /**
  * FEATURE 7: Transaction-Based Blood Issuance.
- * Mandatory DBMS requirement: beginTransaction, commit, and rollBack.
+ * ACID Transaction Architecture: beginTransaction, commit, and rollBack.
  * 
  * Transaction Steps:
  * 1. Acquire DB connection and call $pdo->beginTransaction().

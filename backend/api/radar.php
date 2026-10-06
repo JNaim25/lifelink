@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Radar API Endpoint
  * Provides real-time stock metrics querying view_blood_availability.

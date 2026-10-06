@@ -23,7 +23,7 @@
             </div>
             <div class="d-flex gap-2">
                 <a href="admin_reports.html" class="btn btn-outline-primary fw-semibold">
-                    <i class="bi bi-database-check me-1"></i>DBMS Queries Demo
+                    <i class="bi bi-database-check me-1"></i>SQL Analytics & Reports
                 </a>
                 <a href="admin_donations.html" class="btn btn-danger fw-semibold">
                     <i class="bi bi-droplet-fill me-1"></i>Record Donation Session
@@ -168,7 +168,7 @@
                 </div>
                 <div class="modal-body p-4">
                     <p class="small text-muted mb-3">
-                        This operation executes a mandatory DBMS ACID transaction: locks the requisition, locks earliest expiring FIFO inventory bags with <code>SELECT ... FOR UPDATE</code>, generates issuance records, and updates inventory status atomically.
+                        This operation executes an atomic ACID transaction: locks the requisition, locks earliest expiring FIFO inventory bags with <code>SELECT ... FOR UPDATE</code>, generates issuance records, and updates inventory status atomically.
                     </p>
                     <div class="p-3 bg-light rounded border mb-3">
                         <div class="d-flex justify-content-between mb-1">

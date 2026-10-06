@@ -1,6 +1,5 @@
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Dynamic Navbar & Global Layout Initializer
  */
@@ -51,7 +50,7 @@ async function renderNavbar() {
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-primary fw-semibold ${currentPage === 'admin_reports.html' ? 'active fw-bold text-decoration-underline' : ''}" href="admin_reports.html">
-                        <i class="bi bi-database-check me-1"></i> DBMS Queries Demo
+                        <i class="bi bi-database-check me-1"></i> SQL Analytics & Reports
                     </a>
                 </li>
             `;
@@ -122,7 +121,7 @@ async function renderNavbar() {
                     <i class="bi bi-heart-pulse-fill brand-icon"></i>
                     <div>
                         <span class="text-danger fw-bold fs-4">Life</span><span class="fw-bold fs-4 text-dark">Link</span>
-                        <div style="font-size: 0.65rem; line-height: 1; color: #64748B;">DBMS LAB &bull; CSE 3522</div>
+                        <div style="font-size: 0.65rem; line-height: 1; color: #64748B;">Blood Banking & Transfusion Network</div>
                     </div>
                 </a>
 
@@ -192,16 +191,16 @@ function renderFooter() {
                         <div class="d-flex align-items-center gap-2 justify-content-center justify-content-md-start mb-1">
                             <i class="bi bi-heart-pulse-fill text-danger fs-5"></i>
                             <span class="fw-bold fs-5"><span class="text-danger">Life</span>Link</span>
-                            <span class="badge bg-secondary">v2.0 PHP/HTML</span>
+                            <span class="badge bg-secondary">v2.0</span>
                         </div>
                         <p class="text-muted small mb-0">
-                            Database Management Systems Laboratory &bull; CSE 3522 &bull; 3NF Relational Architecture
+                            Intelligent Blood Banking & Transfusion Network &bull; 3NF Relational Architecture
                         </p>
                     </div>
                     <div class="col-md-6 text-center text-md-end">
                         <div class="d-flex gap-3 justify-content-center justify-content-md-end text-muted small">
                             <span><i class="bi bi-shield-check text-success me-1"></i>ACID Compliant</span>
-                            <span><i class="bi bi-database me-1"></i>MySQL Views & Indexes</span>
+                            <span><i class="bi bi-database me-1"></i>Relational Views & Indexes</span>
                             <span><i class="bi bi-arrow-repeat text-primary me-1"></i>Chain of Custody</span>
                         </div>
                         <div class="text-muted small mt-1">

@@ -1,7 +1,6 @@
 <?php
 /**
  * LifeLink Blood Bank Management System
- * Course: Database Management Systems Laboratory (CSE 3522)
  * 
  * Response Utility
  * Standardized JSON API responses with appropriate HTTP status codes and headers.

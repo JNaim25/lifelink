@@ -1,8 +1,7 @@
 -- ============================================================================
 -- LIFELINK BLOOD BANK MANAGEMENT SYSTEM
--- Course: Database Management Systems Laboratory (CSE 3522)
 -- Relational Database Schema (Normalized to 3NF)
--- Target RDBMS: MySQL 8.0 / MariaDB (XAMPP)
+-- Target Database: MySQL 8.0 / MariaDB (XAMPP)
 -- Storage Engine: InnoDB (Supports ACID Transactions and Foreign Keys)
 -- ============================================================================
 
